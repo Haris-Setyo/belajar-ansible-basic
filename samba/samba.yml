@@ -1,0 +1,43 @@
+---
+- name: install samba basic
+  hosts: samba
+  become: true
+  tasks:
+    - name: install samba
+      apt:
+        pkg: samba
+        state: latest
+        update_cache: true
+      
+    - name: make directory
+      file:
+        dest: /home/flylxy/sambashare
+        state: directory
+      
+    - name: copy default file samba
+      copy:
+        src: /etc/samba/smb.conf
+        dest: /etc/samba/smb.conf_default
+        remote_src: yes
+    
+    - name: input file configuration
+      template:
+        src: smb.conf.j2
+        dest: /etc/samba/smb.conf
+    
+    - name: allow ufw samba
+      ufw:
+        rule: allow
+        name: samba
+    
+    - name: chgrep samba
+      command: chgrp sambashare /home/flylxy/sambashare
+
+    - name: set up a Samba password for our user account
+      command: sudo smbpasswd -a flyxlxy
+
+    - name: restart samba service
+      systemd:
+        name: smb
+        state: restarted
+        enabled: yes

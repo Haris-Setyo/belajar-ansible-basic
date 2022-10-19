@@ -1,0 +1,86 @@
+---
+- name: install FTP
+  hosts: ftp
+  become: true
+  tasks:
+    - name: install ftp ubuntu
+      apt:
+        pkg: vsftpd
+        state: latest
+        update_cache: true
+      tags:
+        - ftp
+      notify:
+        - restart ftp
+
+    - name: Copy a "sudoers" file on the remote machine for editing
+      copy:
+        src: /etc/vsftpd.conf
+        dest: /etc/vsftpd.conf_default
+        remote_src: yes
+      
+    - name: Creates directory
+      file:
+        path: //srv/files/ftp
+        state: directory
+
+    - name: usermood local ftp
+      command: usermod -d /srv/files/ftp ftp
+
+    - name: Allow all access to tcp port 20:21
+      ufw:
+        rule: allow
+        port: 20:21
+        proto: tcp
+
+    - name: changed configuration write_enable=YES
+      lineinfile:                 
+        dest: /etc/vsftpd.conf
+        regexp: "^write_enable"        
+        line: "write_enable=YES"         
+      notify:
+        - restart ftp      
+
+    - name: changed configuration chroot_local_user=YES
+      lineinfile:                 
+        dest: /etc/vsftpd.conf
+        regexp: "^chroot_local_user"        
+        line: "chroot_local_user=YES"         
+      notify:
+        - restart ftp   
+
+    - name: changed configuration chroot_list_enable=YES
+      lineinfile:                 
+        dest: /etc/vsftpd.conf
+        regexp: "^chroot_list_enable"        
+        line: "chroot_list_enable=YES"         
+      notify:
+        - restart ftp   
+    
+    - name: changed configuration chroot_list_file=/etc/vsftpd.chroot_list
+      lineinfile:                 
+        dest: /etc/vsftpd.conf
+        regexp: "^chroot_list_file"        
+        line: "chroot_list_file=/etc/vsftpd.chroot_list"         
+      notify:
+        - restart ftp
+
+    - name: create file chroot_local_list
+      file:
+        path: /etc/vsftpd.chroot_list
+        state: touch
+
+    - name: allow user host access ftp
+      copy:
+        src: vsftpd.chroot_list.j2
+        dest: /etc/vsftpd.chroot_list
+        mode: 0640
+      notify:
+        - restart ftp
+
+  handlers:    
+    - name: restart ftp
+      service:
+        name: vsftpd
+        state: restarted
+

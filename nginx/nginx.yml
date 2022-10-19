@@ -1,0 +1,45 @@
+---
+- name: install nginx basic
+  become: true
+  hosts: nginx
+  tasks:
+  - name: install package nginx
+    apt:
+      pkg: nginx
+      state: latest
+      update_cache: true
+
+  - name: make directory html
+    file:
+      dest: /var/www/html
+      state: directory
+
+  - name: make file index html
+    file:
+      path: /var/www/html/index.html
+      state: touch
+      mode: u+rwx,g-rx,o-rx
+
+  - name: add index.html
+    template:
+      src: index.html.j2
+      dest: /var/www/html/index.html
+
+  - name: copy default config
+    copy:
+      dest: /etc/nginx/sites-enabled/default.backup
+      src: /etc/nginx/sites-enabled/default
+      remote_src: yes
+
+  - name: add config nginx
+    template:
+      src: default.j2
+      dest: /etc/nginx/sites-enabled/default
+
+  - name: reload nginx
+    service:
+      name: nginx
+      state: reloaded
+      enabled: yes
+
+  
