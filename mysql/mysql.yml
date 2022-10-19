@@ -1,0 +1,84 @@
+---
+- name: Install mysql server 
+  hosts: db_server
+  become: true
+  vars:
+    mysql_root_password: '1234567890'   
+  tasks:
+    - name: Ensure required packages are installed
+      apt:
+        pkg: ["mysql-client", "mysql-server", "python3-pip"]
+        state: latest
+        update_cache: true
+
+    - name: enabled service mysql
+      command: systemctl enable mysql.service
+
+    - name: Ensure mysql service is running
+      service:
+        name: mysql
+        state: restarted
+        enabled: yes
+
+    - name: Make sure pymysql is present
+      pip:
+        name: pymysql
+        state: present
+        executable: pip3
+
+
+    - name: Set password for root user
+      mysql_user:
+        name: "root"
+        password: "{{ mysql_root_password }}"
+        priv: '*.*:ALL,GRANT'
+        host: 'localhost'
+        login_unix_socket: /var/run/mysqld/mysqld.sock  
+    #     # login_unix_socket: /var/run/mysqld/mysqld.sock   //replace the path to the socket if necessary) as the password-less login is only available using the socket, not using the network
+        state: present
+
+    - name: Add .my.cnf to user home
+      template:
+        src: my.cnf.j2
+        dest: /root/.my.cnf
+
+
+    - name: Reload privilege tables
+      command: |
+        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
+      with_items:
+        - FLUSH PRIVILEGES
+      changed_when: False
+
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+
+
+    - name: Remove test database and access to it
+      command: |
+        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
+      with_items:
+        - DROP DATABASE IF EXISTS test
+        - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
+      changed_when: False
+
+    - name: Reload privilege tables
+      command: |
+        mysql -p{{ mysql_root_password }} -ne "{{ item }}"
+      with_items:
+        - FLUSH PRIVILEGES
+      changed_when: False
+
+    - name: Dump multiple databases
+      mysql_db:
+        state: dump
+        name: cat_app
+        target: /tmp/dump.sql
+
+    # - name: Delete .my.conf
+    #   file:
+    #     path: /root/.my.cnf
+    #     state: absent

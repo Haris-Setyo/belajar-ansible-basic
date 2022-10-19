@@ -1,0 +1,47 @@
+---
+- name: install jenkins
+  hosts: jenkins
+  become: true
+  tasks: 
+    # - name: install java
+    #   apt:
+    #     pkg: ['openjdk-11-jdk']
+    #     state: latest
+    #     update_cache: true
+    
+    # - name: Add jenkins GPG apt Key
+    #   apt_key:
+    #     url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+    #     state: present
+
+    # - name: Add jenkins Repository
+    #   apt_repository:
+    #     repo: deb http://pkg.jenkins.io/debian-stable binary/
+    #     state: present
+
+    # - name: install jenkins
+    #   apt:
+    #     pkg: jenkins
+    #     state: latest
+    #     update_cache: true
+
+    # - name: start service jenkins
+    #   service:
+    #     name: jenkins
+    #     state: restarted
+    
+    - name: allow ufw 8080
+      ufw:
+        rule: allow
+        port: 8080
+        proto: tcp
+    
+    - name: allow ufw ssh
+      ufw:
+        rule: allow
+        name: OpenSSH
+    
+    - name: allow enable ufw
+      ufw:
+        state: enabled
+        policy: allow

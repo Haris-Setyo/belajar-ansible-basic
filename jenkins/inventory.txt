@@ -1,0 +1,2 @@
+[jenkins]
+jen1 ansible_host=192.168.100.55 ansible_user=flylxy ansible_ssh_pass=1234567890 ansible_sudo_pass=1234567890
