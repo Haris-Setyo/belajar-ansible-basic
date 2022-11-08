@@ -21,7 +21,7 @@
       
     - name: Creates directory
       file:
-        path: //srv/files/ftp
+        path: /srv/files/ftp
         state: directory
 
     - name: usermood local ftp

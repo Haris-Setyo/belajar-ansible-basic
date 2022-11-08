@@ -1,0 +1,15 @@
+---
+- name: install hproxy
+  become: true
+  hosts: hproxy
+  tasks:
+    - name: install package haproxy
+      apt:
+        pkg: haproxy
+        state: latest
+        update_cache: true
+    
+\
+
+
+  

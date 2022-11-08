@@ -3,32 +3,32 @@
   hosts: jenkins
   become: true
   tasks: 
-    # - name: install java
-    #   apt:
-    #     pkg: ['openjdk-11-jdk']
-    #     state: latest
-    #     update_cache: true
+    - name: install java
+      apt:
+        pkg: ['openjdk-11-jdk']
+        state: latest
+        update_cache: true
     
-    # - name: Add jenkins GPG apt Key
-    #   apt_key:
-    #     url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
-    #     state: present
+    - name: Add jenkins GPG apt Key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
 
-    # - name: Add jenkins Repository
-    #   apt_repository:
-    #     repo: deb http://pkg.jenkins.io/debian-stable binary/
-    #     state: present
+    - name: Add jenkins Repository
+      apt_repository:
+        repo: deb http://pkg.jenkins.io/debian-stable binary/
+        state: present
 
-    # - name: install jenkins
-    #   apt:
-    #     pkg: jenkins
-    #     state: latest
-    #     update_cache: true
+    - name: install jenkins
+      apt:
+        pkg: jenkins
+        state: latest
+        update_cache: true
 
-    # - name: start service jenkins
-    #   service:
-    #     name: jenkins
-    #     state: restarted
+    - name: start service jenkins
+      service:
+        name: jenkins
+        state: restarted
     
     - name: allow ufw 8080
       ufw:
